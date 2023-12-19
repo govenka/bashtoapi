@@ -27,8 +27,24 @@ import (
 
 var jwtSecret = []byte("YourprivatefirstJWTToken")
 var token string
+var apiKeys map[string]bool
 var tokenMutex sync.Mutex
 var commandWhitelist map[string]bool
+
+func loadAPIKeys() error {
+    cfg, err := ini.Load("config.ini")
+    if err != nil {
+        return err
+    }
+
+    apiKeys = make(map[string]bool)
+    keysSection := cfg.Section("api_keys")
+    for _, key := range keysSection.Keys() {
+        apiKeys[key.String()] = true
+    }
+
+    return nil
+}
 
 func loadWhitelist() error {
     cfg, err := ini.Load("config.ini")
@@ -82,12 +98,20 @@ func RenewToken() {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		
 		authHeader := c.GetHeader("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, "Authorization header format must be Bearer <token>")
 			c.Abort()
 			return
 		}
+        
+        apiKey := c.GetHeader("API-Key")
+        if _, isValid := apiKeys[apiKey]; !isValid {
+            c.JSON(http.StatusUnauthorized, "Invalid or missing API key")
+            c.Abort()
+            return
+        }
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
@@ -175,8 +199,15 @@ func main() {
 	enableAuth := flag.Bool("enableAuth", true, "Enable JWT authentication")
 	flag.Parse()
 
+    // Load the API keys
+    err := loadAPIKeys()
+    if err != nil {
+        fmt.Println("Failed to load API keys:", err)
+        return
+    }
+
     // Load the whitelist
-    err := loadWhitelist()
+    err = loadWhitelist()
     if err != nil {
         fmt.Println("Failed to load the whitelist:", err)
         return

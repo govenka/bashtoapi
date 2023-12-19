@@ -45,15 +45,16 @@ user>curl http://localhost:8080/get-token
 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M"}
 
 user> curl -X POST http://localhost:8080/run \
+-H "API-Key: APIKEY1" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M" \
 -H "Content-Type: application/json" \
 -d '{"echo": "hello"}'
 hello
 
 Execute ls -l in the current directory : 
-user>curl -X POST http://localhost:8080/run -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M" -H "Content-Type: application/json" -d '{"ls": "-l"}'
+user>curl -X POST http://localhost:8080/run -H "API-Key: APIKEY1" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M" -H "Content-Type: application/json" -d '{"ls": "-l"}'
 
-user> curl -X POST http://localhost:8080/run -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M" -H "Content-Type: application/json" -d '{"ls": "-l /home -a"}'
+user> curl -X POST http://localhost:8080/run -H "API-Key: APIKEY1" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDI5ODMxMjR9.3qZiYzM7dKox-ATDy67rnAFU5y3X6TTV1h63TpxkL3M" -H "Content-Type: application/json" -d '{"ls": "-l /home -a"}'
 ```
 
 ## Whitelist Command Management System
@@ -71,9 +72,13 @@ Add your allowed commands: Under the [whitelist] section, add the commands you w
 ```
 [whitelist]
 commands = echo, ls
+[api_keys]
+key1 = APIKEY1
+key2 = APIKEY2
+key3 = APIKEY3
 ```
 
-This configuration allows the echo and ls commands.
+This configuration allows the echo and ls commands. You can also add in this file all API keys needed
 
 Usage Example
 With the above whitelist configuration, if you want to execute the command ls -l /home via the API, your request should look like:
